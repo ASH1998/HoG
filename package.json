@@ -1,0 +1,15 @@
+{
+  "name": "hog-svm-or",
+  "version": "1.0.0",
+  "description": "Object recognition with Hog and SVM",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "\u0016https://github.com/DavidPynes/HoG-SVM-OR.git"
+  },
+  "author": "Dave P.",
+  "license": "ISC"
+}
