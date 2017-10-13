@@ -1,2 +1,5 @@
 # HoG-SVM-OR
-Object Recognition with HoG and SVM
+Object recognition with HoG and SVM
+
+**Demo**
+https://davidpynes.github.io/HoG-SVM-OR/

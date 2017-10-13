@@ -1,6 +1,5 @@
 import React from "react";
 import styles from './style/style.css';
-import DescriptionData from "./DescriptionData.json"
 import ProcessedComponent from "./ProcessedComponent.js";
 
 export default class Layout extends React.Component {
@@ -29,20 +28,13 @@ export default class Layout extends React.Component {
     if (imagePreviewUrl) {
       $imagePreview = (
     		<div>
-    	    <ProcessedComponent img_data={this.state.file} desc_data={DescriptionData.Original} />
-    	    <ProcessedComponent img_data={this.state.file} desc_data={DescriptionData.Grayscale} />
-    		  <ProcessedComponent img_data={this.state.file} desc_data={DescriptionData.Negative} /> 
-    		  <ProcessedComponent img_data={this.state.file} desc_data={DescriptionData.BoxBlur} /> 
-    		  <ProcessedComponent img_data={this.state.file} desc_data={DescriptionData.Sharpen} /> 
-    		  <ProcessedComponent img_data={this.state.file} desc_data={DescriptionData.Zoom} /> 
-          <ProcessedComponent img_data={this.state.file} desc_data={DescriptionData.EdgeDetection} /> 
-          <ProcessedComponent img_data={this.state.file} desc_data={DescriptionData.HoG} /> 
+    	    <ProcessedComponent img_data={this.state.file} />
     		</div>
 	    );
     }
     return (
       <div>
-        <div className={styles.mainTitle}>Canvas Image Processing</div>
+        <div className={styles.mainTitle}>HoG-SVM-OR</div>
 		    <input className={styles.mainInput} type="file" onChange={(e)=>this.handleChange(e)} />
 		    {$imagePreview}
       </div>

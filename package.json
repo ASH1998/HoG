@@ -2,14 +2,54 @@
   "name": "hog-svm-or",
   "version": "1.0.0",
   "description": "Object recognition with Hog and SVM",
-  "main": "index.js",
+  "main": "webpack.config.js",
   "scripts": {
+    "dev": "./node_modules/.bin/webpack-dev-server --content-base src --inline --hot --host 0.0.0.0 --public --port 3333 --disableHostCheck true",
+    "loc": "./node_modules/.bin/webpack-dev-server --content-base src --inline --hot --open",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "\u0016https://github.com/DavidPynes/HoG-SVM-OR.git"
+    "url": "git+https://github.com/DavidPynes/HoG-SVM-OR.git"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "axios": "^0.16.2",
+    "babel-core": "^6.17.0",
+    "babel-loader": "^7.1.1",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-react-html-attrs": "^2.0.0",
+    "babel-plugin-transform-class-properties": "^6.3.13",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.3.13",
+    "babel-preset-stage-0": "^6.3.13",
+    "jquery": "^3.2.1",
+    "node-sass": "^4.5.3",
+    "react": "^15.6.1",
+    "react-bootstrap": "^0.31.1",
+    "react-dom": "^15.6.1",
+    "react-flexbox-grid": "^1.1.5",
+    "react-fontawesome": "^1.6.1",
+    "react-image": "^1.0.1",
+    "react-native": "^0.49.3",
+    "react-native-webpack": "^0.1.1",
+    "sass-loader": "^6.0.6",
+    "webpack": "^3.4.1",
+    "webpack-dev-server": "^2.6.1"
+  },
+  "devDependencies": {
+    "css-loader": "^0.28.4",
+    "file-loader": "^0.11.2",
+    "image-webpack-loader": "^3.3.1",
+    "style-loader": "^0.18.2"
   },
   "author": "Dave P.",
-  "license": "ISC"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DavidPynes/HoG-SVM-OR/issues"
+  },
+  "homepage": "https://github.com/DavidPynes/HoG-SVM-OR#readme"
 }
