@@ -1,0 +1,67 @@
+{
+  "Original" : {
+    "title": "Original Image",
+    "description": "An image is an artifact that depicts visual perception, for example, a photo or a two-dimensional picture, that has a similar appearance to some subject—usually a physical object or a person, thus providing a depiction of it. Above is the unprocessed rendering of your image.",
+    "link": "https://en.wikipedia.org/wiki/Image",   
+    "equation": "N/A",
+    "type": 0
+  },
+
+  "Grayscale" : {
+    "title": "Grayscale Image",
+    "description": "A grayscale image is one in which the value of each pixel is a single sample representing only an amount of light, that is, it carries only intensity information. Above is a desaturated image, showing only light intensity. This is accomplished by averaging each pixel rgb values together. Above is a grayscale representation of your image.",
+    "link": "https://en.wikipedia.org/wiki/Grayscale",
+    "equation": "f(x,y) = (valR + valG + valB) / 3",
+    "type": 1
+  },
+
+  "Negative" : {
+    "title": "Negative Image",
+    "description": "In photography, a negative is an image, usually on a strip or sheet of transparent plastic film, in which the lightest areas of the photographed subject appear darkest and the darkest areas appear lightest. Above is a negative image, showing each pixels opposite. This is accomplished by finding the compliment of each 8 bit rgb value. Above is the compliment of your image.",
+    "link": "https://en.wikipedia.org/wiki/Negative_(photography)",
+    "equation": "f(x,y)[R | G | B ] = (255 - value[R | G | B])",
+    "type": 2
+  },
+
+  "BoxBlur" : {
+    "title": "Box Blur",
+    "description": "A box blur (also known as a box linear filter) is a spatial domain linear filter in which each pixel in the resulting image has a value equal to the average value of its neighboring pixels in the input image. Above is an image that where all neighboring pixels are averaged together.",
+    "link": "https://en.wikipedia.org/wiki/Box_blur",
+    "equation": "f(x,y) = 1/9*[[a,b,c],[d,e,f],[g,h,i]] = 1/9*(a+b+c+d+e+f+g+h+i)",
+    "type": 3
+  },
+
+  "Sharpen" : {
+    "title": "Sharpen Image",
+    "description": "Edge enhancement is an image processing filter that enhances the edge contrast of an image or video in an attempt to improve its acutance (apparent sharpness). Above is your image with sharpening.",
+    "link": "https://en.wikipedia.org/wiki/Edge_enhancement",
+    "equation": "f(x,y) = [[a,b,c],[d,e,f],[g,h,i]] = 9*e-(a+b+c+d+f+g+h+i)",
+    "type": 4
+  },
+
+  "Zoom" : {
+    "title": "Zoom Image",
+    "description": "Image scaling can be interpreted as a form of image resampling or image reconstruction from the view of the Nyquist sampling theorem. According to the theorem, downsampling to a smaller image from a higher-resolution original can only be carried out only after applying a suitable 2D anti-aliasing filter to prevent aliasing artifacts. The image is reduced to the information that can be carried by the smaller image. Above is an image zoomed 2x using interpolation of the nearest neighbor. Above is your image zoomed.",
+    "link": "https://en.wikipedia.org/wiki/Image_scaling",
+    "equation": "f(x,y) => set all neighboring pixels to interpolation with current pixel .",
+    "type": 5
+  },
+
+  "EdgeDetection" : {
+    "title": "Edge Detection",
+    "description": "Edge detection is a fundamental tool in image processing and computer vision, particularly in the areas of feature detection and feature extraction, which aim at identifying points in a digital image at which the image brightness changes sharply. Above is an edge detected image.",
+    "link": "https://en.wikipedia.org/wiki/Edge_detection",
+    "equation": "f(x,y) => the luminsocity convolved in the vertical and horizontal directions. Calculate the manhatten distance if value (contrast) is significant between pixels an edge is detected.",
+    "type": 6
+  },
+
+  "HoG" : {
+    "title": "HoG",
+    "description": "The histogram of oriented gradients (HOG) is a feature descriptor used in computer vision and image processing for the purpose of object detection. The technique counts occurrences of gradient orientation in localized portions of an image. Above is an image where the gradients are featured.",
+    "link": "https://en.wikipedia.org/wiki/Histogram_of_oriented_gradients",
+    "equation": "tbc",
+    "type": 7
+  }
+
+}
+

@@ -1,0 +1,112 @@
+$main-padding: 5px;
+$main-color: #096649;
+
+$container-background-color: #307C62; 
+
+$default-content-margin: 25px;
+$default-title-color: #FCFCFC;
+$default-color: #DCDCFF;
+
+
+.default-title-extension {
+	color: $default-title-color;
+	text-decoration: underline;
+	font-weight: bold;
+}
+
+.componentContainer {
+	padding: $main-padding + 10px;
+	max-width: 500px;
+	min-width: 500px;
+	border: 3px solid #000000;
+	margin: 15px;
+	box-shadow: 5px 10px 20px #101010;
+	background: $container-background-color;
+}
+
+.componentImageContainer {
+}
+
+.componentImageTitle {
+	color: $default-title-color;
+	text-align: center;
+	text-decoration: none;
+	font-size: 42px;
+	padding-bottom: 5px;
+}
+
+.componentImageContent { 
+	max-height: 400px;
+	max-width: 400px;	
+	min-height: 200px;
+	min-width: 200px;
+	border: 2px solid #101010;
+	margin-left: $default-content-margin;
+}
+
+.componentDescriptionContainer {
+}
+
+.componentDescriptionTitle {
+	@extend .default-title-extension;
+}
+
+.componentDescriptionContent {
+	color: $default-color;
+	margin-left: $default-content-margin;
+}
+
+.componentLinkContainer {
+}
+
+.componentLinkTitle {
+	@extend .default-title-extension;
+}
+
+.componentLinkContent {
+	color: $default-color;
+	margin-left: $default-content-margin;
+}
+
+.componentEquationContainer {
+}
+
+.componentEquationTitle {
+	@extend .default-title-extension;
+}
+
+.componentEquationContent {
+	color: $default-color;
+	margin-left: $default-content-margin;
+}
+
+.mainTitle {
+	color: $default-title-color;
+	background: #40728D;
+	border: 2px solid #EFEFEF;
+	max-width: 500px;
+	min-width: 500px;
+	padding: 5px 10px 5px 0px;
+	margin: 5px;
+	font-size: 42px;
+	text-align: center;
+
+}
+
+.mainInput {
+	color: $default-title-color;
+	padding-left: $main-padding;
+}
+
+body {
+	background: $main-color;
+}
+
+a { 
+	color: $default-color;
+}
+
+a:hover {
+	color: $default-title-color;
+	text-decoration: none;
+}
