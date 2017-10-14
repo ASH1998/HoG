@@ -1,45 +1,36 @@
-.default-title-extension, .componentDescriptionTitle, .componentLinkTitle, .componentEquationTitle {
+.default-title-extension {
   color: #FCFCFC;
   text-decoration: underline;
   font-weight: bold; }
 
-.componentImageContainer {
+.default-container-extension, .componentImageContainer, .componentPreviewImageContainer {
   padding: 5px;
-  max-width: 500px;
-  min-width: 500px;
-  max-height: 500px;
-  min-height: 500px;
-  border: 3px solid #000000;
   margin: 15px;
+  border: 3px solid #000000;
   box-shadow: 5px 10px 20px #101010;
   background: #A03030; }
 
-.componentImageTitle {
-  color: #FCFCFC;
-  text-align: center;
-  text-decoration: none;
-  font-size: 42px;
-  padding-bottom: 5px; }
+.componentImageContainer {
+  max-width: 450px;
+  min-width: 450px;
+  max-height: 450px;
+  min-height: 450px;
+  margin: 25px; }
+
+.componentPreviewImageContainer {
+  max-width: 150px;
+  min-width: 150px;
+  max-height: 450px;
+  min-height: 450px;
+  margin: 25px; }
 
 .componentImageContent {
   max-height: 400px;
-  max-width: 400px;
-  min-height: 200px;
+  max-height: 400px;
+  min-width: 200px;
   min-width: 200px;
   border: 2px solid #101010;
-  margin-left: 25px; }
-
-.componentDescriptionContent {
-  color: #DCDCFF;
-  margin-left: 25px; }
-
-.componentLinkContent {
-  color: #DCDCFF;
-  margin-left: 25px; }
-
-.componentEquationContent {
-  color: #DCDCFF;
-  margin-left: 25px; }
+  margin: 20px 0px 0px 30px; }
 
 .mainTitle {
   color: #FCFCFC;

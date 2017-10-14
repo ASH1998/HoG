@@ -5,8 +5,10 @@ import styles from './style/style.css';
 export default class ProcessedComponent extends React.Component {
 
   constructor(props) {
-	super(props);
-	this.componentRoutine = this.componentRoutine.bind(this);
+	   super(props);
+    this.state = { ogdata: ''};
+     this.componentRoutine = this.componentRoutine.bind(this);
+     this.drawBoundingBox = this.drawBoundingBox.bind(this);
   }
 
   imageIsGrayscale() {
@@ -137,21 +139,49 @@ export default class ProcessedComponent extends React.Component {
   	return imageData;
   }
 
+  drawBoundingBox() { 
+    var ctx = this.refs.canvas.getContext('2d');
+    var imageData = this.state.ogdata;
+    var data = imageData.data;
+    for(var i = 0; i < 400; i+=4) {
+      data[i] = data[i + 1] = data[i + 2] = 255;
+      data[i + (200*1600)] = data[i + (200*1600) + 1] = data[i + (200*1600) + 2] = 255;
+    }
+    for(var i = 0; i < (200*1600); i+=1600) {
+      data[i] = data[i + 1] = data[i + 2] = 255;
+      data[i + 396] = data[i + 396 + 1] = data[i + 396 +2] = 255;
+    }
+
+    ctx.putImageData(imageData,0,0);
+
+    var clip_ctx = this.refs.clip_canvas.getContext('2d');
+    var clip_imageData = ctx.getImageData(0,0,100,200);
+    for(var i = 0; i < 200*1600; i+=1600) {
+      for(var j = 0; j < 400; j+=4) {
+        clip_imageData[i + j] = data[i + j];
+        clip_imageData[i + j + 1] = data[i + j + 1];
+        clip_imageData[i + j + 2] = data[i + j + 2]; 
+      }
+    }
+    clip_ctx.putImageData(clip_imageData,0,0);
+
+  }
+
   componentRoutine() {
 	var ctx = this.refs.canvas.getContext('2d');
-	var clip_ctx = this.refs.clip_canvas.getContext('2d');
-
+	
 	var img = new Image;
 	img.onload = () => {
+
 	  //draw image onto the canvas
 	  this.refs.canvas.height = (400 * img.height / img.width);
-	  ctx.drawImage(img, 0, 0, 400, 400 * img.height / img.width);		
+	  ctx.drawImage(img, 0, 0, 400, 400 * img.height / img.width);	
+    
+    var imageData = ctx.getImageData(0,0,400,400*this.refs.canvas.height/this.refs.canvas.width);
+    this.setState({ ogdata: imageData });
+	  
+    this.drawBoundingBox();
 
-	  //process the image.
-	  //ctx.putImageData(imageData, 0, 0);
-
-	  //prototyping.
-	  clip_ctx.drawImage(img,0,0,100,200);
 	}
 	img.src = URL.createObjectURL(this.props.img_data);	
 
@@ -170,17 +200,11 @@ export default class ProcessedComponent extends React.Component {
       <div className={styles.componentContainer}>  
         <Grid fluid>
           <Row>
-            <Col xs={12} md={6} lg={4}>
-              <div className={styles.componentImageContainer}>
-	  		    <div className={styles.componentImageTitle}>Full Image</div>
-	  		    <canvas className={styles.componentImageContent} ref="canvas" width={400} />
-        	  </div>
-        	</Col>
-            <Col xs={12} md={6} lg={4}>
-              <div className={styles.componentImageContainer}>
-	  		    <div className={styles.componentImageTitle}>Clip Image</div>
-	  		    <canvas className={styles.componentImageContent} ref="clip_canvas" height={200} width={100} />
-              </div>
+            <Col xs={4} sm={4} md={4} lg={4} className={styles.componentImageContainer}>
+                <canvas className={styles.componentImageContent} ref="canvas" width={400} />
+        	  </Col>
+            <Col xs={4} sm={4} md={2} lg={2} className={styles.componentPreviewImageContainer}>
+	  		        <canvas className={styles.componentImageContent} ref="clip_canvas" height={200} width={100} />
             </Col>
           </Row>
         </Grid>
