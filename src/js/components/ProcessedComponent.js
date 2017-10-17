@@ -24,24 +24,24 @@ export default class ProcessedComponent extends React.Component {
 
      this.componentRoutine = this.componentRoutine.bind(this);
      this.drawBoundingBox = this.drawBoundingBox.bind(this);
+     
+     //mouse events to pick new location of sample space
+     this.moveBoundingBox = this.moveBoundingBox.bind(this);
      this.dragBoundingBox = this.dragBoundingBox.bind(this);
      this.dropBoundingBox = this.dropBoundingBox.bind(this);
   }
 
-  dropBoundingBox(event) { 
+  moveBoundingBox(event) {
     if(this.state.moveable.isMoveable) {
+
       //determine distance mouse traveled
       var dx = event.nativeEvent.layerX - this.state.moveable.x;
       var dy = event.nativeEvent.layerY - this.state.moveable.y;
 
-      //reset moveable
-      var moveableUpdate = {isMoveable: false, x: 0, y: 0};
-      this.setState({moveable: moveableUpdate})
-
       //redraw bouding box
       this.drawBoundingBox(dx,dy);
     }
-  }
+  } 
 
   dragBoundingBox(event) {
     //if the mouse clicks within the bounding box prepare to move bounding box by updating moveable
@@ -56,11 +56,43 @@ export default class ProcessedComponent extends React.Component {
     }
   }
 
+  dropBoundingBox(event) { 
+    if(this.state.moveable.isMoveable) {
+      
+      //determine distance mouse traveled
+      var dx = event.nativeEvent.layerX - this.state.moveable.x;
+      var dy = event.nativeEvent.layerY - this.state.moveable.y;
+
+      //reset moveable
+      var moveableUpdate = {isMoveable: false, x: 0, y: 0};
+      this.setState({moveable: moveableUpdate})
+
+      //update bounding box
+      var boxBoundariesUpdate = {
+        left: (this.state.boxBoundaries.left+dx),
+        right: (this.state.boxBoundaries.right+dx),
+        top: (this.state.boxBoundaries.top+dy),
+        bottom: (this.state.boxBoundaries.bottom+dy)
+      }
+      this.setState({boxBoundaries: boxBoundariesUpdate});   
+    }
+  }
+
   drawBoundingBox(dx,dy) { 
     var ctx = this.refs.canvas.getContext('2d');
 
     //repaint original image on canvas
     ctx.putImageData(this.state.ogdata,0,0);
+
+    //check boundary conditions for boundary box//
+    if( this.state.boxBoundaries.left + dx < 0 )
+      dx = 0 - this.state.boxBoundaries.left;
+    if( this.state.boxBoundaries.right + dx > 400 )
+      dx = 400 - this.state.boxBoundaries.right;
+    if( this.state.boxBoundaries.top + dy < 0 )
+      dy = 0 - this.state.boxBoundaries.top;
+    if ( this.state.boxBoundaries.bottom + dy > this.refs.canvas.height )
+      dy = this.refs.canvas.height - this.state.boxBoundaries.bottom;
 
     var data = this.state.ogdata.data;
     var clip_ctx = this.refs.clip_canvas.getContext('2d');
@@ -87,15 +119,6 @@ export default class ProcessedComponent extends React.Component {
     ctx.strokeStyle = '#FFFFFF';
     ctx.stroke();
 
-    //update bounding box
-    var boxBoundariesUpdate = {
-      left: (this.state.boxBoundaries.left+dx),
-      right: (this.state.boxBoundaries.right+dx),
-      top: (this.state.boxBoundaries.top+dy),
-      bottom: (this.state.boxBoundaries.bottom+dy)
-    }
-    this.setState({boxBoundaries: boxBoundariesUpdate});
-      
   }
 
   componentRoutine() {
@@ -133,7 +156,7 @@ export default class ProcessedComponent extends React.Component {
         <Grid fluid>
           <Row>
             <Col xs={4} sm={4} md={4} lg={4} className={styles.imageContainer}>
-                <canvas onMouseDown={this.dragBoundingBox} onMouseUp={this.dropBoundingBox} className={styles.imageContent} ref="canvas" width={400} />
+                <canvas onMouseDown={this.dragBoundingBox} onMouseUp={this.dropBoundingBox} onMouseLeave={this.dropBoundingBox} onMouseMove={this.moveBoundingBox} className={styles.imageContent} ref="canvas" width={400} />
         	  </Col>
             <Col xs={4} sm={4} md={3} lg={3}>
               <div className={styles.previewImageContainer}>
