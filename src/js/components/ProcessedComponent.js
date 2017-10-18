@@ -58,7 +58,7 @@ export default class ProcessedComponent extends React.Component {
 
   dropBoundingBox(event) { 
     if(this.state.moveable.isMoveable) {
-      
+
       //determine distance mouse traveled
       var dx = event.nativeEvent.layerX - this.state.moveable.x;
       var dy = event.nativeEvent.layerY - this.state.moveable.y;
@@ -155,10 +155,10 @@ export default class ProcessedComponent extends React.Component {
       <div className={styles.componentContainer}>  
         <Grid fluid>
           <Row>
-            <Col xs={4} sm={4} md={4} lg={4} className={styles.imageContainer}>
-                <canvas onMouseDown={this.dragBoundingBox} onMouseUp={this.dropBoundingBox} onMouseLeave={this.dropBoundingBox} onMouseMove={this.moveBoundingBox} className={styles.imageContent} ref="canvas" width={400} />
+            <Col xs={12} sm={4} md={4} lg={4} className={styles.imageContainer}>
+                <canvas onMouseDown={this.dragBoundingBox} onTouchStart={this.dragBoundningBox} onMouseMove={this.moveBoundingBox} onTouchMove={this.moveBoundingBox} onMouseUp={this.dropBoundingBox} onTouchEnd={this.dropBoundingBox} onMouseLeave={this.dropBoundingBox} className={styles.imageContent} ref="canvas" width={400} />
         	  </Col>
-            <Col xs={4} sm={4} md={3} lg={3}>
+            <Col xs={12} sm={3} md={3} lg={3}>
               <div className={styles.previewImageContainer}>
 	  		        <canvas className={styles.previewImageContent} ref="clip_canvas" height={200} width={100} />
               </div>
