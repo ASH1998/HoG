@@ -155,7 +155,7 @@ export default class ProcessedComponent extends React.Component {
       <div className={styles.componentContainer}>  
         <Grid fluid>
           <Row>
-            <Col xs={12} sm={4} md={4} lg={4} className={styles.imageContainer}>
+            <Col xs={8} sm={4} md={4} lg={4} className={styles.imageContainer}>
                 <canvas onMouseDown={this.dragBoundingBox} onTouchStart={this.dragBoundningBox} onMouseMove={this.moveBoundingBox} onTouchMove={this.moveBoundingBox} onMouseUp={this.dropBoundingBox} onTouchEnd={this.dropBoundingBox} onMouseLeave={this.dropBoundingBox} className={styles.imageContent} ref="canvas" width={400} />
         	  </Col>
             <Col xs={12} sm={3} md={3} lg={3}>
