@@ -67,6 +67,16 @@ $default-color: #DCDCFF;
 
 }
 
+.format {
+	padding-top: 5px;
+	margin: $default-content-margin;
+}
+
+.spacer {
+	margin-left: 10px;
+	padding-left: 10px;
+}
+
 .mainInput {
 	color: $default-title-color;
 	padding-left: $main-padding;
