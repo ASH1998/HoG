@@ -1,12 +1,15 @@
 import React from 'react';
 import { Grid, Row, Col } from 'react-flexbox-grid';
 import styles from './style/style.css';
+import GraphedComponent from './GraphedComponent.js';
 
 export default class ProcessedComponent extends React.Component {
 
   constructor(props) {
 	   super(props);
      this.state = { 
+      train: false,
+      clip_imageData: {},
       ogdata: '',
 
       boxBoundaries: {
@@ -18,7 +21,7 @@ export default class ProcessedComponent extends React.Component {
       moveable: {
         isMoveable: false,
         x: 0,
-        y: 0 }
+        y: 0 },
 
      };
 
@@ -29,6 +32,8 @@ export default class ProcessedComponent extends React.Component {
      this.moveBoundingBox = this.moveBoundingBox.bind(this);
      this.dragBoundingBox = this.dragBoundingBox.bind(this);
      this.dropBoundingBox = this.dropBoundingBox.bind(this);
+
+     this.train = this.train.bind(this);
   }
 
   moveBoundingBox(event) {
@@ -52,7 +57,7 @@ export default class ProcessedComponent extends React.Component {
           event.nativeEvent.layerY < this.state.boxBoundaries.bottom
     ) {
       var moveableUpdate = {isMoveable: true, x: event.nativeEvent.layerX, y: event.nativeEvent.layerY};
-      this.setState({moveable: moveableUpdate });
+      this.setState({moveable: moveableUpdate, train: false });
     }
   }
 
@@ -121,6 +126,17 @@ export default class ProcessedComponent extends React.Component {
 
   }
 
+  train(e) {
+    e.preventDefault();
+    var dest_canvas = document.createElement("canvas");
+    dest_canvas.height = 128;
+    dest_canvas.width = 64;
+    var destCtx = dest_canvas.getContext('2d');
+    destCtx.scale(0.64, 0.64);
+    destCtx.drawImage(this.refs.clip_canvas,0,0);
+    this.setState({train: true,clip_imageData: destCtx.getImageData(0,0,64,128)});
+  }
+
   componentRoutine() {
   	var ctx = this.refs.canvas.getContext('2d');
   	
@@ -150,7 +166,17 @@ export default class ProcessedComponent extends React.Component {
 	  this.componentRoutine();
   }
 
-  render() {
+  render() {    
+    let graphTrainedComponent = this.state.train;
+    let $graphPreview = null;
+      
+    if (graphTrainedComponent) {
+      $graphPreview = (
+        <div>
+          <GraphedComponent img_data={this.state.clip_imageData} />
+        </div>
+      );
+    }
     return (
       <div className={styles.componentContainer}>  
         <Grid fluid>
@@ -158,7 +184,7 @@ export default class ProcessedComponent extends React.Component {
             <Col xs={8} sm={4} md={4} lg={4} className={styles.imageContainer}>
               <canvas className={styles.imageContent} onMouseDown={this.dragBoundingBox} onTouchStart={this.dragBoundningBox} onMouseMove={this.moveBoundingBox} onTouchMove={this.moveBoundingBox} onMouseUp={this.dropBoundingBox} onTouchEnd={this.dropBoundingBox} onMouseLeave={this.dropBoundingBox} ref="canvas" width={400} />
         	    <div className={styles.format}>
-        	      <button> Train </button>
+        	      <button onClick={(e)=>this.train(e)} > Train </button>
         	      <span className={styles.spacer}>  
         	        <select>
                       <option>yes</option>
@@ -169,9 +195,14 @@ export default class ProcessedComponent extends React.Component {
                 <div className={styles.format}>
                   <button>Test</button>
                 </div>
-        	</Col>
+        	  </Col>
             <Col xs={12} sm={3} md={2} lg={2} className={styles.previewImageContainer}>
-        	  <canvas className={styles.previewImageContent} ref="clip_canvas" height={200} width={100} />
+        	    <canvas className={styles.previewImageContent} ref="clip_canvas" height={200} width={100} />
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={8} sm={4} md={4} lg={4} className={styles.imageContainer}>
+              <div>asd {$graphPreview}</div>
             </Col>
           </Row>
         </Grid>
