@@ -183,26 +183,28 @@ export default class ProcessedComponent extends React.Component {
           <Row>
             <Col xs={8} sm={4} md={4} lg={4} className={styles.imageContainer}>
               <canvas className={styles.imageContent} onMouseDown={this.dragBoundingBox} onTouchStart={this.dragBoundningBox} onMouseMove={this.moveBoundingBox} onTouchMove={this.moveBoundingBox} onMouseUp={this.dropBoundingBox} onTouchEnd={this.dropBoundingBox} onMouseLeave={this.dropBoundingBox} ref="canvas" width={400} />
-        	    <div className={styles.format}>
-        	      <button onClick={(e)=>this.train(e)} > Train </button>
-        	      <span className={styles.spacer}>  
-        	        <select>
-                      <option>yes</option>
-                      <option>no</option>
-                    </select>
-                  </span>
-        	    </div>
+      	      <div  className={styles.format}>
                 <div className={styles.format}>
+        	        <button onClick={(e)=>this.train(e)} > Train </button>
+        	      </div>
+                <div  className={styles.format}>
+                  <select>
+                    <option>yes</option>
+                    <option>no</option>
+                  </select>
+                </div>
+        	      <div  className={styles.format}>
                   <button>Test</button>
                 </div>
-        	  </Col>
+              </div>
+            </Col>
             <Col xs={12} sm={3} md={2} lg={2} className={styles.previewImageContainer}>
         	    <canvas className={styles.previewImageContent} ref="clip_canvas" height={200} width={100} />
             </Col>
           </Row>
           <Row>
             <Col xs={8} sm={4} md={4} lg={4} className={styles.imageContainer}>
-              <div>asd {$graphPreview}</div>
+              <div>{$graphPreview}</div>
             </Col>
           </Row>
         </Grid>

@@ -50,6 +50,7 @@
   text-align: center; }
 
 .format {
+  display: inline-block;
   padding-top: 5px;
   margin: 25px; }
 

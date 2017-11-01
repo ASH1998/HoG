@@ -5,8 +5,11 @@ export default class GraphedComponent extends React.Component {
 
   constructor(props) {
 	super(props);
-	  this.state = {};	
+	  this.state = {
+      bins: {} 
+    };	
     this.HoGGraph = this.HoGGraph.bind(this);
+    this.displayGraph = this.displayGraph.bind(this);
   }
 
   HoGGraph() {
@@ -22,6 +25,7 @@ export default class GraphedComponent extends React.Component {
     tempData[i] = tempData[i + 1] = tempData[i + 2] = shade;
   } 
 
+  /* calculate magnitude of gradients (and angle) */
 
   var grid = [], arr_of_tuples = [];
   for(var i = 0; i < h; i++) { 
@@ -44,11 +48,12 @@ export default class GraphedComponent extends React.Component {
   var bin = [0,0,0,0,0,0,0,0,0]
   var grid_of_bins = [];
   /*  
-    Runs O(n)... divide the magnitude of each pixels angle to it's nearest bin
-    the bins = [0,20,40,60,80,100,120,140,160]
-    If we have a pixel with an angle ( direction ) of 80 degrees and magnitude of 2 it would adds 2 to the 5th bin.  
-    The gradient of a the pixel with an angle of 10 degrees and magnitude of 5 is half way between 0 and 20, the vote by the pixel 
-    splits evenly into the two bins, so the 1st bin would receive 2.5 and then the 2nd bin would receive 2.5 votes. 
+    Binify the tuples: divide the magnitude of each pixel's angle to it's nearest bin.
+    bins = [0,20,40,60,80,100,120,140,160] (deg)
+    If we have a pixel with an angle of 80 degrees and magnitude of 2, then we would add 2 to the 5th bin.  
+    The gradient of a pixel with an angle of 10 degrees and a magnitude of 5 is half way between 0 and 20 degrees, 
+    the vote by the pixel would then be split evenly into the two bins. The 1st bin at 0 would receive 2.5 votes
+    and then the 2nd bin at 20 would receive the other 2.5 votes. 
   */
 
     //iterate over the columns 8x8
@@ -70,6 +75,7 @@ export default class GraphedComponent extends React.Component {
       bin = [0,0,0,0,0,0,0,0,0];
       }
     }
+    this.setState({bins: grid_of_bins});
 
   //normalize the values and create 36x1 vectors
     var concated_bins = []; //36x1
@@ -104,21 +110,35 @@ export default class GraphedComponent extends React.Component {
         concated_bins = [];
       }
     }
-    console.log(all_normal_bins);
+  }
+
+  displayGraph(e) {
+    var loc = e.target.options[e.target.selectedIndex].text
+    var loc = loc.split(" ");
+    var i = loc[1][0]-1;
+    var j = loc[2][0]-1;
+    console.log(this.state.bins[i][j]);
+
   }
 
   componentDidUpdate() {
-    this.HoGGraph();    
   }
 
   componentDidMount() {
     this.HoGGraph();
   }
 
-  render() {
+  render() { 
+    var loc =  [];
+    for(var i=0;i<16;i++) { 
+      for(var j=0;j<8;j++) {
+        loc.push([i,j]);
+      }
+    }
+    var graphList = loc.map(function(b,i){return <option key={b}>Bin {b[0]+1}/16 {b[1]+1}/8 </option>;})
     return (
-      <div> 
-       <h1>Hi</h1>
+      <div>
+        <select onChange={(e) => this.displayGraph(e)}>{graphList}</select>
       </div>
     );
   }
