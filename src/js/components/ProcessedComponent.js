@@ -172,9 +172,11 @@ export default class ProcessedComponent extends React.Component {
       
     if (graphTrainedComponent) {
       $graphPreview = (
-        <div>
-          <GraphedComponent img_data={this.state.clip_imageData} />
-        </div>
+        <Col xs={8} sm={4} md={4} lg={4} className={styles.graphContainer}>
+          <div>
+            <GraphedComponent img_data={this.state.clip_imageData} />
+          </div>
+        </Col>
       );
     }
     return (
@@ -198,14 +200,14 @@ export default class ProcessedComponent extends React.Component {
                 </div>
               </div>
             </Col>
-            <Col xs={12} sm={3} md={2} lg={2} className={styles.previewImageContainer}>
+            <Col xs={4} sm={3} md={2} lg={2} className={styles.previewImageContainer}>
         	    <canvas className={styles.previewImageContent} ref="clip_canvas" height={200} width={100} />
             </Col>
           </Row>
           <Row>
-            <Col xs={8} sm={4} md={4} lg={4} className={styles.imageContainer}>
-              <div>{$graphPreview}</div>
-            </Col>
+            <span>
+              {$graphPreview}
+            </span>
           </Row>
         </Grid>
       </div>

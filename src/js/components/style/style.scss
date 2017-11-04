@@ -38,20 +38,34 @@ $default-color: #DCDCFF;
 
 .previewImageContainer {
 	@extend .default-container-extension;
+	margin: $default-content-margin;
 	max-height: 450px;
 	min-height: 450px;	
 	max-width: 250px;
 	min-width: 250px;
-	margin: $default-content-margin;
 }
 
 .previewImageContent { 
 	max-height: 400px;
-	max-height: 400px;	
+	min-height: 400px;	
 	max-width: 200px;
 	min-width: 200px;
 	border: 2px solid #101010;
 	margin: 17.5px 0px 0px 17.5px;
+}
+
+.graphContainer {
+	@extend .default-container-extension;
+	margin: $default-content-margin;
+	max-height: 400px;
+	min-height: 400px;
+	max-width: 750px;
+	min-width: 750px;
+}
+
+.canvasGraph {
+	border: 2px solid #000;
+	margin: 10px 5px 5px 5px;
 }
 
 .mainTitle {
