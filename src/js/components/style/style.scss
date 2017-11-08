@@ -68,6 +68,10 @@ $default-color: #DCDCFF;
 	margin: 10px 5px 5px 5px;
 }
 
+.canvasPlot {
+	
+}
+
 .mainTitle {
 	color: $default-title-color;
 	background: #A0423D;
@@ -81,13 +85,10 @@ $default-color: #DCDCFF;
 }
 
 .mainQuote {
+	color: #fff;
 	font-size: 16px;
 	font-style: italic;
-	font-weight: bolder;
-	margin: 5px 25px 5px 25px;
-
-
-	
+	margin: 5px 50px 5px 50px;
 }
 
 .format {

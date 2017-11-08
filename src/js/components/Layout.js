@@ -35,7 +35,7 @@ export default class Layout extends React.Component {
     return (
       <div>
         <div className={styles.mainTitle}>HoG-SVM-OR</div>
-		<div className={styles.mainQuote}>How do you complete a marathon? One step at a time. </div>
+		<div className={styles.mainQuote}>How to complete a marathon...one step at a time. </div>
 		    <input className={styles.mainInput} type="file" onChange={(e)=>this.handleChange(e)} />
 		    {$imagePreview}
       </div>

@@ -1,58 +1,20 @@
 import React from "react";
 import styles from './style/style.css';
 
-export default class GraphedComponent extends React.Component {
+export default class PlottedComponent extends React.Component {
 
   constructor(props) {
 	super(props);
 	  this.state = {
-      bins: {} 
+      normal_bins: {} 
     };	
-    this.HoGGraph = this.HoGGraph.bind(this);
     this.displayGraph = this.displayGraph.bind(this);
     this.initGraph = this.initGraph.bind(this);
     this.drawGraph = this.drawGraph.bind(this);
   }
 
-  HoGGraph() {
-    this.setState({bins: this.props.grid_of_bins});
-
-  //normalize the values and create 36x1 vectors
-    var concated_bins = []; //36x1
-    var all_normal_bins = [];
-    for(var i = 0; i < grid_of_bins.length - 1; i++) {
-      for(var j = 0; j < grid_of_bins[i].length - 1; j++) {
-        var normalize = 0, k = 0;
-        while(k < 4) {
-          for(var l = 0; l < 9; l++) {
-            if(k == 0) {
-              normalize += grid_of_bins[i][j][l]*grid_of_bins[i][j][l];
-              concated_bins.push(grid_of_bins[i][j][l]);
-            }
-            else if(k == 1) {
-              normalize += grid_of_bins[i+1][j][l]*grid_of_bins[i+1][j][l];
-              concated_bins.push(grid_of_bins[i+1][j][l]);
-            }
-            else if(k == 2) {
-              normalize += grid_of_bins[i+1][j+1][l]*grid_of_bins[i+1][j+1][l];
-              concated_bins.push(grid_of_bins[i+1][j+1][l]);
-            }
-            else if(k == 3) {
-              normalize += grid_of_bins[i][j+1][l]*grid_of_bins[i][j+1][l];
-              concated_bins.push(grid_of_bins[i][j+1][l]);
-            }
-          }
-          k++;
-        }
-        for(var l = 0; l < concated_bins.length; l++)
-          concated_bins[l] = concated_bins[l]/(Math.sqrt(normalize)); 
-        all_normal_bins.push(concated_bins)
-        concated_bins = [];
-      }
-    }
-  }
-
   initGraph() {
+    /*
     //clear the graph and draw bounding deg lines//
     var ctx = this.refs.graph.getContext('2d');
     ctx.clearRect(0, 0, this.refs.graph.width, this.refs.graph.height);
@@ -78,9 +40,11 @@ export default class GraphedComponent extends React.Component {
     ctx.fillText("160",625,320);
     ctx.fillRect(680, 300, 2.5, 10);  //160
     ctx.fillText("180",690,320);
+    */
   }
 
   drawGraph(i,j) {
+    /*
     var ctx = this.refs.graph.getContext('2d');
   
     //determine the max factor needed to scale the graph onto the canvas//
@@ -112,15 +76,10 @@ export default class GraphedComponent extends React.Component {
         ctx.strokeRect( ((k*80)-40), 300-(h/mf), 80, (h/mf) ); 
       }
     }
+    */
   }
 
   displayGraph(e) {
-    var loc = e.target.options[e.target.selectedIndex].text
-    var loc = loc.split(" ");
-    var i = loc[1][0]-1;
-    var j = loc[2][0]-1;
-    this.initGraph();
-    this.drawGraph(i,j);
 
   }
 
@@ -129,7 +88,6 @@ export default class GraphedComponent extends React.Component {
 
   componentDidMount() {
     new Promise((resolve, reject) => {
-      this.HoGGraph();
       resolve();
     }).then((result) => {
       return this.initGraph();

@@ -2,6 +2,7 @@ import React from 'react';
 import { Grid, Row, Col } from 'react-flexbox-grid';
 import styles from './style/style.css';
 import GraphedComponent from './GraphedComponent.js';
+import PlottedComponent from './PlottedComponent.js';
 
 export default class ProcessedComponent extends React.Component {
 
@@ -23,7 +24,9 @@ export default class ProcessedComponent extends React.Component {
         x: 0,
         y: 0 },
 
-      bins: {}
+      bins: {},
+
+      normal_bins: {}
 
      };
 
@@ -225,6 +228,7 @@ export default class ProcessedComponent extends React.Component {
         concated_bins = [];
       }
     }
+    this.setState({normal_bins: all_normal_bins});
   }
 
   train(e) {
@@ -287,12 +291,20 @@ export default class ProcessedComponent extends React.Component {
   render() {    
     let graphTrainedComponent = this.state.train;
     let $graphPreview = null;
+    let $plotPreview = null;
       
     if (graphTrainedComponent) {
       $graphPreview = (
         <Col xs={8} sm={4} md={4} lg={4} className={styles.graphContainer}>
           <div>
             <GraphedComponent bins={this.state.bins} />
+          </div>
+        </Col>
+      );
+      $plotPreview = (
+        <Col xs={8} sm={4} md={4} lg={4} className={styles.graphContainer}>
+          <div>
+            <PlottedComponent normal_bins={this.state.normal_bins} />
           </div>
         </Col>
       );
@@ -325,6 +337,11 @@ export default class ProcessedComponent extends React.Component {
           <Row>
             <span>
               {$graphPreview}
+            </span>
+          </Row>          
+          <Row>
+            <span>
+              {$plotPreview}
             </span>
           </Row>
         </Grid>
