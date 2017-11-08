@@ -23,6 +23,8 @@ export default class ProcessedComponent extends React.Component {
         x: 0,
         y: 0 },
 
+      bins: {}
+
      };
 
      this.componentRoutine = this.componentRoutine.bind(this);
@@ -126,6 +128,105 @@ export default class ProcessedComponent extends React.Component {
 
   }
 
+  HoGGraph() {
+      //get the pixel data off of the canvas
+    var imageData = this.state.clip_imageData;
+    var data = imageData.data;
+    var h = imageData.height;
+    var w = imageData.width;
+    var tempData = new Uint8ClampedArray(data);
+
+    for(var i = 0; i < data.length; i += 4) {
+      var shade = 0.34 * data[i] + 0.5 * data[i + 1] + 0.16 * data[i + 2];
+      tempData[i] = tempData[i + 1] = tempData[i + 2] = shade;
+    } 
+
+    /* calculate magnitude of gradients (and angle) */
+    var grid = [], arr_of_tuples = [];
+    for(var i = 0; i < h; i++) { 
+        for(var j = 0; j < w*4; j+=4 ) {
+          var curIndex = (i*(w*4) + j), gradX = 0, gradY = 0, angle = 0, magnitude = 0;
+          if(j!=0 && j!=(w*4-4)) //avoid edges
+            gradX = tempData[curIndex + 4] - tempData[curIndex - 4];
+          if(i!=0 && i!=(h-1) ) //avoid edges
+            gradY = tempData[curIndex - (w*4)] - tempData[curIndex + (w*4)];
+          magnitude = Math.sqrt( ( (gradX*gradX) + (gradY*gradY) ) ); 
+          angle = Math.floor(Math.atan(gradY/gradX)*57.29+90); // arctan(y/x) provides radians, 1 radian is 57.29 degrees, shift angle from (-90,90) to (0,180)
+          if(isNaN(angle))
+            angle = 0;
+        arr_of_tuples.push([magnitude,angle]);
+      }
+      grid.push(arr_of_tuples);
+      arr_of_tuples = [];
+      }
+    
+    var bin = [0,0,0,0,0,0,0,0,0]
+    var grid_of_bins = [];
+    /*  
+      Binify the tuples: divide the magnitude of each pixel's angle to it's nearest bin.
+      bins = [0,20,40,60,80,100,120,140,160] (deg)
+      If we have a pixel with an angle of 80 degrees and magnitude of 2, then we would add 2 to the 5th bin.  
+      The gradient of a pixel with an angle of 10 degrees and a magnitude of 5 is half way between 0 and 20 degrees, 
+      the vote by the pixel would then be split evenly into the two bins. The 1st bin at 0 would receive 2.5 votes
+      and then the 2nd bin at 20 would receive the other 2.5 votes. 
+    */
+
+    //iterate over the columns 8x8
+    for(var i = 0; i < grid.length; i+=8) {
+      //iterate over the rows 8x8
+      grid_of_bins.push(new Array())
+      for(var j = 0; j < w; j+=8) {
+        //now iterate and calculate the indivdual tuples in the 8x8 area assigning the weight proportionally to each bin.
+        for(var k = j; k < (j + 8); k++) {
+          for(var l = i; l < (i + 8); l++) {
+            var bi = Math.floor(grid[l][k][1]/20); //bi is the bin index.
+            var ratio = (grid[l][k][1]/20 - bi);
+            bin[ bi ] += (1 - ratio)*grid[l][k][0];
+            //since we are dealing with 0deg to 180deg, catch overflow.
+            ( (bi + 1) > 8) ? bin[0] += ratio*grid[l][k][0] : bin[ (bi+1) ] += ratio*grid[l][k][0]; 
+          }
+        }
+      grid_of_bins[i/8].push(bin);
+      bin = [0,0,0,0,0,0,0,0,0];
+      }
+    }
+    this.setState({bins: grid_of_bins});
+
+    //normalize the values and create 36x1 vectors
+    var concated_bins = []; //36x1
+    var all_normal_bins = [];
+    for(var i = 0; i < grid_of_bins.length - 1; i++) {
+      for(var j = 0; j < grid_of_bins[i].length - 1; j++) {
+        var normalize = 0, k = 0;
+        while(k < 4) {
+          for(var l = 0; l < 9; l++) {
+            if(k == 0) {
+              normalize += grid_of_bins[i][j][l]*grid_of_bins[i][j][l];
+              concated_bins.push(grid_of_bins[i][j][l]);
+            }
+            else if(k == 1) {
+              normalize += grid_of_bins[i+1][j][l]*grid_of_bins[i+1][j][l];
+              concated_bins.push(grid_of_bins[i+1][j][l]);
+            }
+            else if(k == 2) {
+              normalize += grid_of_bins[i+1][j+1][l]*grid_of_bins[i+1][j+1][l];
+              concated_bins.push(grid_of_bins[i+1][j+1][l]);
+            }
+            else if(k == 3) {
+              normalize += grid_of_bins[i][j+1][l]*grid_of_bins[i][j+1][l];
+              concated_bins.push(grid_of_bins[i][j+1][l]);
+            }
+          }
+          k++;
+        }
+        for(var l = 0; l < concated_bins.length; l++)
+          concated_bins[l] = concated_bins[l]/(Math.sqrt(normalize)); 
+        all_normal_bins.push(concated_bins)
+        concated_bins = [];
+      }
+    }
+  }
+
   train(e) {
     e.preventDefault();
     var dest_canvas = document.createElement("canvas");
@@ -133,8 +234,14 @@ export default class ProcessedComponent extends React.Component {
     dest_canvas.width = 64;
     var destCtx = dest_canvas.getContext('2d');
     destCtx.scale(0.64, 0.64);
-    destCtx.drawImage(this.refs.clip_canvas,0,0);
-    this.setState({train: true,clip_imageData: destCtx.getImageData(0,0,64,128)});
+    destCtx.drawImage(this.refs.clip_canvas,0,0);    
+    new Promise((resolve, reject) => {
+      this.setState({train: true,clip_imageData: destCtx.getImageData(0,0,64,128)});
+        resolve();
+      }).then((result) => {
+        this.HoGGraph();
+      }).then((result) => {
+    });
   }
 
   componentRoutine() {
@@ -143,7 +250,7 @@ export default class ProcessedComponent extends React.Component {
   	var img = new Image;
   	//when the compount mounts draw image onto the canvas
     img.onload = () => {
-  	  
+
       //get width and heigh (sized accordingly)
       var w = this.refs.canvas.width;
       var h = this.refs.canvas.height = (400 * img.height / img.width);
@@ -159,7 +266,18 @@ export default class ProcessedComponent extends React.Component {
 
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
+    this.componentRoutine();   
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if(this.props.img_data.name != nextProps.img_data.name){
+      return true;
+    }
+    if( nextState.train ) {
+      return true;
+    }
+    return false;
   }
 
   componentDidMount() {
@@ -174,7 +292,7 @@ export default class ProcessedComponent extends React.Component {
       $graphPreview = (
         <Col xs={8} sm={4} md={4} lg={4} className={styles.graphContainer}>
           <div>
-            <GraphedComponent img_data={this.state.clip_imageData} />
+            <GraphedComponent bins={this.state.bins} />
           </div>
         </Col>
       );
@@ -184,7 +302,7 @@ export default class ProcessedComponent extends React.Component {
         <Grid fluid>
           <Row>
             <Col xs={8} sm={4} md={4} lg={4} className={styles.imageContainer}>
-              <canvas className={styles.imageContent} onMouseDown={this.dragBoundingBox} onTouchStart={this.dragBoundningBox} onMouseMove={this.moveBoundingBox} onTouchMove={this.moveBoundingBox} onMouseUp={this.dropBoundingBox} onTouchEnd={this.dropBoundingBox} onMouseLeave={this.dropBoundingBox} ref="canvas" width={400} />
+              <canvas className={styles.imageContent} onMouseDown={this.dragBoundingBox} onTouchStart={this.dragBoundningBox} onMouseMove={this.moveBoundingBox} onTouchMove={this.moveBoundingBox} onMouseUp={this.dropBoundingBox} onTouchEnd={this.dropBoundingBox} ref="canvas" width={400} />
       	      <div  className={styles.format}>
                 <div className={styles.format}>
         	        <button onClick={(e)=>this.train(e)} > Train </button>

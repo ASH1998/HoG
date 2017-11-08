@@ -8,9 +8,48 @@ export default class GraphedComponent extends React.Component {
 	  this.state = {
       bins: {} 
     };	
+    this.HoGGraph = this.HoGGraph.bind(this);
     this.displayGraph = this.displayGraph.bind(this);
     this.initGraph = this.initGraph.bind(this);
     this.drawGraph = this.drawGraph.bind(this);
+  }
+
+  HoGGraph() {
+    this.setState({bins: this.props.grid_of_bins});
+
+  //normalize the values and create 36x1 vectors
+    var concated_bins = []; //36x1
+    var all_normal_bins = [];
+    for(var i = 0; i < grid_of_bins.length - 1; i++) {
+      for(var j = 0; j < grid_of_bins[i].length - 1; j++) {
+        var normalize = 0, k = 0;
+        while(k < 4) {
+          for(var l = 0; l < 9; l++) {
+            if(k == 0) {
+              normalize += grid_of_bins[i][j][l]*grid_of_bins[i][j][l];
+              concated_bins.push(grid_of_bins[i][j][l]);
+            }
+            else if(k == 1) {
+              normalize += grid_of_bins[i+1][j][l]*grid_of_bins[i+1][j][l];
+              concated_bins.push(grid_of_bins[i+1][j][l]);
+            }
+            else if(k == 2) {
+              normalize += grid_of_bins[i+1][j+1][l]*grid_of_bins[i+1][j+1][l];
+              concated_bins.push(grid_of_bins[i+1][j+1][l]);
+            }
+            else if(k == 3) {
+              normalize += grid_of_bins[i][j+1][l]*grid_of_bins[i][j+1][l];
+              concated_bins.push(grid_of_bins[i][j+1][l]);
+            }
+          }
+          k++;
+        }
+        for(var l = 0; l < concated_bins.length; l++)
+          concated_bins[l] = concated_bins[l]/(Math.sqrt(normalize)); 
+        all_normal_bins.push(concated_bins)
+        concated_bins = [];
+      }
+    }
   }
 
   initGraph() {
@@ -46,8 +85,8 @@ export default class GraphedComponent extends React.Component {
   
     //determine the max factor needed to scale the graph onto the canvas//
     var mf = 1;  
-    for(var k=0; k<this.props.bins[i][j].length; k++) {
-      var h = this.props.bins[i][j][k];
+    for(var k=0; k<this.state.bins[i][j].length; k++) {
+      var h = this.state.bins[i][j][k];
       var f = 1; 
       while(  (h/f) >= 300) { (f > mf) ? mf = f : f; f++;}
     }
@@ -60,8 +99,8 @@ export default class GraphedComponent extends React.Component {
 
     //if k == 0 then graph 0deg and 180deg, else graph within bounds
     ctx.fillStyle="#CAA6A9";
-    for(var k=0; k<this.props.bins[i][j].length; k++) {
-      var h = this.props.bins[i][j][k]; 
+    for(var k=0; k<this.state.bins[i][j].length; k++) {
+      var h = this.state.bins[i][j][k]; 
       if(k == 0) {
         ctx.fillRect( 0, 300-(h/mf), 40, (h/mf) );
         ctx.strokeRect(0, 300-(h/mf) , 40, (h/mf) );
@@ -82,53 +121,29 @@ export default class GraphedComponent extends React.Component {
     var j = loc[2][0]-1;
     this.initGraph();
     this.drawGraph(i,j);
+
   }
 
-  componentDidUpdate(prevProps, prevState) {    
-    new Promise((resolve, reject) => {
-      this.initGraph();
-      resolve();
-    }).then((result) => {
-      return this.drawGraph(0,0);
-    })
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    if(this.props.bins != nextProps.bins){
-      return true;
-    }
-    return false;
+  componentDidUpdate() {
   }
 
   componentDidMount() {
     new Promise((resolve, reject) => {
-      this.initGraph();
+      this.HoGGraph();
       resolve();
     }).then((result) => {
+      return this.initGraph();
+    }).then((result) => {
       return this.drawGraph(0,0);
-    })
+    });
   }
 
   render() { 
-    var loc =  [];
-    for(var i=0;i<16;i++) { 
-      for(var j=0;j<8;j++) {
-        loc.push([i,j]);
-      }
-    }
-    var graphList = loc.map(function(b,i){
-      if(b[0]==0 && b[1]==0) 
-        return <option defaultValue key={b}>Bin {b[0]+1}/16 {b[1]+1}/8 </option>;
-      else
-        return <option key={b}>Bin {b[0]+1}/16 {b[1]+1}/8 </option>;
-    })
     return (
       <div>
-        <select ref="selection" onChange={(e) => this.displayGraph(e)}>{graphList}</select>
-        <span style={{float:'right',margin:'0px 15px 0px 0px',fontStyle:'italic'}}> {this.state.scale} </span>
-        <canvas ref="graph" className={styles.canvasGraph} height={350} width={720} />
+        <canvas ref="plot" className={styles.canvasPlot} height={350} width={720} />
       </div>
     );
-    }
-
   }
+
+}
