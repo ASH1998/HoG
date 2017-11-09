@@ -24,21 +24,21 @@ export default class ProcessedComponent extends React.Component {
         x: 0,
         y: 0 },
 
-      bins: {},
+      bins: {}, //store 16x8 bins of [0,20,40,60,80,100,120,140,160]
 
-      normal_bins: {}
+      normal_bins: {} //store 16 1x36 vectors (normalized)
 
      };
 
      this.componentRoutine = this.componentRoutine.bind(this);
-     this.drawBoundingBox = this.drawBoundingBox.bind(this);
-     
+     this.train = this.train.bind(this); //Calls the HoG function and stores data in ProcessedComponent's state
+
      //mouse events to pick new location of sample space
+     this.drawBoundingBox = this.drawBoundingBox.bind(this);
      this.moveBoundingBox = this.moveBoundingBox.bind(this);
      this.dragBoundingBox = this.dragBoundingBox.bind(this);
      this.dropBoundingBox = this.dropBoundingBox.bind(this);
 
-     this.train = this.train.bind(this);
   }
 
   moveBoundingBox(event) {
@@ -131,7 +131,7 @@ export default class ProcessedComponent extends React.Component {
 
   }
 
-  HoGGraph() {
+  HoG() {
       //get the pixel data off of the canvas
     var imageData = this.state.clip_imageData;
     var data = imageData.data;
@@ -240,12 +240,12 @@ export default class ProcessedComponent extends React.Component {
     destCtx.scale(0.64, 0.64);
     destCtx.drawImage(this.refs.clip_canvas,0,0);    
     new Promise((resolve, reject) => {
-      this.setState({train: true,clip_imageData: destCtx.getImageData(0,0,64,128)});
+        this.setState({train: true,clip_imageData: destCtx.getImageData(0,0,64,128)});
         resolve();
       }).then((result) => {
-        this.HoGGraph();
-      }).then((result) => {
-    });
+        this.HoG();
+        this.setState({train: false})
+      });
   }
 
   componentRoutine() {

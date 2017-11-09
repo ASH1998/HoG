@@ -87,6 +87,7 @@ export default class PlottedComponent extends React.Component {
   }
 
   componentDidMount() {
+    /*
     new Promise((resolve, reject) => {
       resolve();
     }).then((result) => {
@@ -94,6 +95,7 @@ export default class PlottedComponent extends React.Component {
     }).then((result) => {
       return this.drawGraph(0,0);
     });
+    */
   }
 
   render() { 

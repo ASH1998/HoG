@@ -4,10 +4,7 @@ import styles from './style/style.css';
 export default class GraphedComponent extends React.Component {
 
   constructor(props) {
-	super(props);
-	  this.state = {
-      bins: {} 
-    };	
+	  super(props);
     this.displayGraph = this.displayGraph.bind(this);
     this.initGraph = this.initGraph.bind(this);
     this.drawGraph = this.drawGraph.bind(this);
@@ -51,12 +48,12 @@ export default class GraphedComponent extends React.Component {
       var f = 1; 
       while(  (h/f) >= 300) { (f > mf) ? mf = f : f; f++;}
     }
-
     if(mf > 1) {
-      this.setState({scale: "*scaled " + mf + " times*"})
+      this.refs.msg.textContent = "*scaled " + mf + " times*";
     }
-    else 
-      this.setState({scale: " "});
+    else {
+      this.refs.msg.textContent = "";
+    }
 
     //if k == 0 then graph 0deg and 180deg, else graph within bounds
     ctx.fillStyle="#CAA6A9";
@@ -79,22 +76,27 @@ export default class GraphedComponent extends React.Component {
     var loc = e.target.options[e.target.selectedIndex].text
     var loc = loc.split(" ");
     var i = loc[1][0]-1;
-    var j = loc[2][0]-1;
-    this.initGraph();
-    this.drawGraph(i,j);
-  }
-
-  componentDidUpdate(prevProps, prevState) {    
+    var j = loc[2][0]-1;    
     new Promise((resolve, reject) => {
       this.initGraph();
       resolve();
     }).then((result) => {
-      return this.drawGraph(0,0);
+      this.drawGraph(i,j);
+    })
+  }
+
+  componentDidUpdate(prevProps, prevState) {   
+    new Promise((resolve, reject) => {
+      this.initGraph();
+      resolve();
+    }).then((result) => {
+      this.drawGraph(0,0);
     })
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if(this.props.bins != nextProps.bins){
+    if(this.props.bins != nextProps.bins) {
+      this.refs.defaultOption.selected = true; 
       return true;
     }
     return false;
@@ -118,14 +120,14 @@ export default class GraphedComponent extends React.Component {
     }
     var graphList = loc.map(function(b,i){
       if(b[0]==0 && b[1]==0) 
-        return <option defaultValue key={b}>Bin {b[0]+1}/16 {b[1]+1}/8 </option>;
+        return <option ref='defaultOption' defaultValue key={b}>Bin {b[0]+1}/16 {b[1]+1}/8 </option>;
       else
         return <option key={b}>Bin {b[0]+1}/16 {b[1]+1}/8 </option>;
     })
     return (
       <div>
         <select ref="selection" onChange={(e) => this.displayGraph(e)}>{graphList}</select>
-        <span style={{float:'right',margin:'0px 15px 0px 0px',fontStyle:'italic'}}> {this.state.scale} </span>
+        <span ref="msg" style={{float:'right',margin:'0px 15px 0px 0px',fontStyle:'italic'}} >  </span>
         <canvas ref="graph" className={styles.canvasGraph} height={350} width={720} />
       </div>
     );
