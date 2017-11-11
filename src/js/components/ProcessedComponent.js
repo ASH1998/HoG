@@ -189,13 +189,13 @@ export default class ProcessedComponent extends React.Component {
                 <div className={styles.format}>
         	        <button onClick={(e)=>this.train(e)} > Train </button>
         	      </div>
-                <div  className={styles.format}>
+                <div className={styles.format}>
                   <select>
                     <option>yes</option>
                     <option>no</option>
                   </select>
                 </div>
-        	      <div  className={styles.format}>
+        	      <div className={styles.format}>
                   <button>Test</button>
                 </div>
               </div>
