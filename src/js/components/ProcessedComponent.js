@@ -26,11 +26,18 @@ export default class ProcessedComponent extends React.Component {
 
       bins: {}, //store 16x8 bins of [0,20,40,60,80,100,120,140,160]
 
-      normal_bins: {} //store 16 1x36 vectors (normalized)
+      normal_bins: {}, //store 16x8 bins (normalized)
+
+      signature_bins: {}, //store 16 1x36 vectors (normalized)
+
+      base: true
 
      };
 
      this.componentRoutine = this.componentRoutine.bind(this);
+
+     this.initComponentRoutine = this.initComponentRoutine.bind(this);
+
      this.train = this.train.bind(this); //Calls the HoG function and stores data in ProcessedComponent's state
 
      //mouse events to pick new location of sample space
@@ -38,6 +45,8 @@ export default class ProcessedComponent extends React.Component {
      this.moveBoundingBox = this.moveBoundingBox.bind(this);
      this.dragBoundingBox = this.dragBoundingBox.bind(this);
      this.dropBoundingBox = this.dropBoundingBox.bind(this);
+
+     this.initPlotPreview = this.initPlotPreview.bind(this);
 
   }
 
@@ -88,7 +97,7 @@ export default class ProcessedComponent extends React.Component {
     }
   }
 
-  drawBoundingBox(dx,dy) { 
+  initDrawBoundingBox(dx,dy) { 
     var ctx = this.refs.canvas.getContext('2d');
 
     //repaint original image on canvas
@@ -117,6 +126,53 @@ export default class ProcessedComponent extends React.Component {
       }
     }
     clip_ctx.putImageData(clip_imageData,0,0);
+      
+    //draw bounding box on original image showing area of clipped image
+    ctx.beginPath();
+    ctx.moveTo(this.state.boxBoundaries.left+dx, this.state.boxBoundaries.top+dy);
+    ctx.lineTo(this.state.boxBoundaries.left+dx, this.state.boxBoundaries.bottom+dy);
+    ctx.lineTo(this.state.boxBoundaries.right+dx, this.state.boxBoundaries.bottom+dy);
+    ctx.lineTo(this.state.boxBoundaries.right+dx, this.state.boxBoundaries.top+dy);
+    ctx.lineTo(this.state.boxBoundaries.left+dx, this.state.boxBoundaries.top+dy);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.stroke();
+
+  }
+
+
+  drawBoundingBox(dx,dy) { 
+    var ctx = this.refs.canvas.getContext('2d');
+
+    //repaint original image on canvas
+    ctx.putImageData(this.state.ogdata,0,0);
+   
+      //check boundary conditions for boundary box//
+      if( this.state.boxBoundaries.left + dx < 0 )
+        dx = 0 - this.state.boxBoundaries.left;
+      if( this.state.boxBoundaries.right + dx > 400 )
+        dx = 400 - this.state.boxBoundaries.right;
+      if( this.state.boxBoundaries.top + dy < 0 )
+        dy = 0 - this.state.boxBoundaries.top;
+      if ( this.state.boxBoundaries.bottom + dy > this.refs.canvas.height )
+        dy = this.refs.canvas.height - this.state.boxBoundaries.bottom;
+
+      if(this.state.moveable.isMoveable) {
+        var data = this.state.ogdata.data;
+        var clip_ctx = this.refs.clip_canvas.getContext('2d');
+        var clip_imageData = ctx.getImageData(this.state.boxBoundaries.left+dx,this.state.boxBoundaries.top+dy,this.state.boxBoundaries.right+dx,this.state.boxBoundaries.bottom+dy);
+
+        //draw zoomed, clipped, image
+        for(var i = (dy*1600); i < (200*1600 + dy*1600); i+=1600) {
+          for(var j = (dx*4); j < (400 + dx*4); j+=4) {
+            clip_imageData[i + j] = data[i + j];
+            clip_imageData[i + j + 1] = data[i + j + 1];
+            clip_imageData[i + j + 2] = data[i + j + 2]; 
+          }
+        }
+        clip_ctx.putImageData(clip_imageData,0,0);
+      }
+    
 
     //draw bounding box on original image showing area of clipped image
     ctx.beginPath();
@@ -132,7 +188,7 @@ export default class ProcessedComponent extends React.Component {
   }
 
   HoG() {
-      //get the pixel data off of the canvas
+    //get the pixel data off of the canvas
     var imageData = this.state.clip_imageData;
     var data = imageData.data;
     var h = imageData.height;
@@ -165,6 +221,7 @@ export default class ProcessedComponent extends React.Component {
     
     var bin = [0,0,0,0,0,0,0,0,0]
     var grid_of_bins = [];
+
     /*  
       Binify the tuples: divide the magnitude of each pixel's angle to it's nearest bin.
       bins = [0,20,40,60,80,100,120,140,160] (deg)
@@ -174,7 +231,7 @@ export default class ProcessedComponent extends React.Component {
       and then the 2nd bin at 20 would receive the other 2.5 votes. 
     */
 
-    //iterate over the columns 8x8
+    //iterate over the 8x8 cells
     for(var i = 0; i < grid.length; i+=8) {
       //iterate over the rows 8x8
       grid_of_bins.push(new Array())
@@ -182,7 +239,7 @@ export default class ProcessedComponent extends React.Component {
         //now iterate and calculate the indivdual tuples in the 8x8 area assigning the weight proportionally to each bin.
         for(var k = j; k < (j + 8); k++) {
           for(var l = i; l < (i + 8); l++) {
-            var bi = Math.floor(grid[l][k][1]/20); //bi is the bin index.
+            var bi = Math.floor(grid[l][k][1]/20); //bi is bin index.
             var ratio = (grid[l][k][1]/20 - bi);
             bin[ bi ] += (1 - ratio)*grid[l][k][0];
             //since we are dealing with 0deg to 180deg, catch overflow.
@@ -191,13 +248,36 @@ export default class ProcessedComponent extends React.Component {
         }
       grid_of_bins[i/8].push(bin);
       bin = [0,0,0,0,0,0,0,0,0];
+
       }
     }
+
     this.setState({bins: grid_of_bins});
+
+    //make a clone of the grid_of_bins. These values will later be nomralized and then visualized on the sample space.
+    var grid_of_normal_bins = grid_of_bins.map(function(arr) {
+      return arr.map(function(bin)  {
+        return bin.slice();
+      });
+    });
+
+    //normalize the 8x8 cells
+    for(var i=0;i<grid_of_normal_bins.length;i++) {
+      for(var j=0;j<grid_of_normal_bins[i].length;j++) {
+        var normalize = 0;
+        for(var k=0;k<grid_of_normal_bins[i][j].length;k++)
+          normalize += grid_of_normal_bins[i][j][k]*grid_of_normal_bins[i][j][k];
+        for(var k=0;k<grid_of_normal_bins[i][j].length;k++) {
+          grid_of_normal_bins[i][j][k] = grid_of_normal_bins[i][j][k]/(Math.sqrt(normalize));
+        }
+      }
+    }
+
+    this.setState({normal_bins: grid_of_normal_bins});
 
     //normalize the values and create 36x1 vectors
     var concated_bins = []; //36x1
-    var all_normal_bins = [];
+    var all_signature_bins = [];
     for(var i = 0; i < grid_of_bins.length - 1; i++) {
       for(var j = 0; j < grid_of_bins[i].length - 1; j++) {
         var normalize = 0, k = 0;
@@ -224,11 +304,85 @@ export default class ProcessedComponent extends React.Component {
         }
         for(var l = 0; l < concated_bins.length; l++)
           concated_bins[l] = concated_bins[l]/(Math.sqrt(normalize)); 
-        all_normal_bins.push(concated_bins)
+        all_signature_bins.push(concated_bins)
         concated_bins = [];
       }
     }
-    this.setState({normal_bins: all_normal_bins});
+    this.setState({signature_bins: all_signature_bins});
+  }
+
+  initPlotPreview() { 
+    var ctx = this.refs.clip_canvas.getContext('2d');
+    ctx.strokeStyle="#000000";    
+    ctx.beginPath();
+    var grid_size = 12.5;
+
+    for(var i=grid_size; i<this.refs.clip_canvas.width;i=i+grid_size) {
+      ctx.moveTo(i,0);
+      ctx.lineTo(i, 200);
+    } 
+    for(var i=grid_size; i<this.refs.clip_canvas.height;i=i+grid_size) {
+      ctx.moveTo(0,i);
+      ctx.lineTo(100,i);
+    }
+    ctx.stroke();
+
+
+///////ERROR IN NORMALIIZING BINS! /////
+
+
+    ctx.strokeStyle="#FF0000";    
+    ctx.beginPath();
+    for(var i=0; i<this.state.normal_bins.length; i++) {
+      for(var j=0; j<this.state.normal_bins[i].length; j++) {    
+        //get center of bin
+        var x = j*grid_size;
+        var y = i*grid_size;
+        for(var k=0;k<this.state.normal_bins[i][j].length; k++) {
+
+          if(k == 0) { //0 / 180 deg
+
+
+
+            var adj_mag = ( (this.state.normal_bins[i][j][k]*grid_size) );
+            ctx.moveTo( x+(grid_size/2), y+(grid_size/2) );
+            ctx.lineTo( x+(grid_size/2)+adj_mag, y+(grid_size/2) );
+            ctx.lineTo( x+(grid_size/2)-adj_mag, y+(grid_size/2) );
+
+
+          }
+          else if(k == 1) {
+            
+          }
+          else if(k == 2) {
+            
+          }
+          else if(k == 3) {
+            
+          }
+          else if(k == 4) {
+            
+          }
+          else if(k == 5) {
+            
+          }
+          else if(k == 6) {
+            
+          }
+          else if(k == 7) {
+            
+          }
+          else if(k == 8) {
+
+          }
+          else {
+            console.log("error: index out of bounds");
+          }
+        }
+      }
+    }
+    ctx.stroke()
+
   }
 
   train(e) {
@@ -245,7 +399,9 @@ export default class ProcessedComponent extends React.Component {
       }).then((result) => {
         this.HoG();
         this.setState({train: false})
-      });
+    }).then((result) => {
+        this.initPlotPreview();
+    })
   }
 
   componentRoutine() {
@@ -270,6 +426,28 @@ export default class ProcessedComponent extends React.Component {
 
   }
 
+    initComponentRoutine() {
+    var ctx = this.refs.canvas.getContext('2d');
+    
+    var img = new Image;
+    //when the compount mounts draw image onto the canvas
+    img.onload = () => {
+
+      //get width and heigh (sized accordingly)
+      var w = this.refs.canvas.width;
+      var h = this.refs.canvas.height = (400 * img.height / img.width);
+
+      //draw image and draw a bounding, preview, box
+      ctx.drawImage(img, 0, 0, w, h); 
+      var imageData = ctx.getImageData(0, 0, w, h);
+      this.setState({ ogdata: imageData });
+      this.initDrawBoundingBox(0,0);
+    }
+    
+    img.src = URL.createObjectURL(this.props.img_data); 
+
+  }
+
   componentDidUpdate(prevProps, prevState) {
     this.componentRoutine();   
   }
@@ -279,19 +457,23 @@ export default class ProcessedComponent extends React.Component {
       return true;
     }
     if( nextState.train ) {
+      this.setState({base: false});
+      return true;
+    }
+    if ( nextState.moveable.isMoveable && !this.state.base ) {
+      this.setState({base: true});
       return true;
     }
     return false;
   }
 
   componentDidMount() {
-	  this.componentRoutine();
+	  this.initComponentRoutine();
   }
 
   render() {    
     let graphTrainedComponent = this.state.train;
     let $graphPreview = null;
-    let $plotPreview = null;
       
     if (graphTrainedComponent) {
       $graphPreview = (
@@ -301,19 +483,12 @@ export default class ProcessedComponent extends React.Component {
           </div>
         </Col>
       );
-      $plotPreview = (
-        <Col xs={8} sm={4} md={4} lg={4} className={styles.graphContainer}>
-          <div>
-            <PlottedComponent normal_bins={this.state.normal_bins} />
-          </div>
-        </Col>
-      );
     }
     return (
       <div className={styles.componentContainer}>  
         <Grid fluid>
           <Row>
-            <Col xs={8} sm={4} md={4} lg={4} className={styles.imageContainer}>
+            <Col xs={8} sm={4} md={4} lg={3} className={styles.imageContainer}>
               <canvas className={styles.imageContent} onMouseDown={this.dragBoundingBox} onTouchStart={this.dragBoundningBox} onMouseMove={this.moveBoundingBox} onTouchMove={this.moveBoundingBox} onMouseUp={this.dropBoundingBox} onTouchEnd={this.dropBoundingBox} ref="canvas" width={400} />
       	      <div  className={styles.format}>
                 <div className={styles.format}>
@@ -325,12 +500,12 @@ export default class ProcessedComponent extends React.Component {
                     <option>no</option>
                   </select>
                 </div>
-        	      <div  className={styles.format}>
+        	      <div className={styles.format}>
                   <button>Test</button>
                 </div>
               </div>
             </Col>
-            <Col xs={4} sm={3} md={2} lg={2} className={styles.previewImageContainer}>
+            <Col xs={4} sm={3} md={2} lg={1} className={styles.previewImageContainer}>
         	    <canvas className={styles.previewImageContent} ref="clip_canvas" height={200} width={100} />
             </Col>
           </Row>
@@ -339,11 +514,6 @@ export default class ProcessedComponent extends React.Component {
               {$graphPreview}
             </span>
           </Row>          
-          <Row>
-            <span>
-              {$plotPreview}
-            </span>
-          </Row>
         </Grid>
       </div>
     );
