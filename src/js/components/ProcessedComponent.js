@@ -327,10 +327,6 @@ export default class ProcessedComponent extends React.Component {
     }
     ctx.stroke();
 
-
-///////ERROR IN NORMALIIZING BINS! /////
-
-
     ctx.strokeStyle="#FF0000";    
     ctx.beginPath();
     for(var i=0; i<this.state.normal_bins.length; i++) {
@@ -339,45 +335,14 @@ export default class ProcessedComponent extends React.Component {
         var x = j*grid_size;
         var y = i*grid_size;
         for(var k=0;k<this.state.normal_bins[i][j].length; k++) {
-
-          if(k == 0) { //0 / 180 deg
-
-
-
-            var adj_mag = ( (this.state.normal_bins[i][j][k]*grid_size) );
-            ctx.moveTo( x+(grid_size/2), y+(grid_size/2) );
-            ctx.lineTo( x+(grid_size/2)+adj_mag, y+(grid_size/2) );
-            ctx.lineTo( x+(grid_size/2)-adj_mag, y+(grid_size/2) );
-
-
-          }
-          else if(k == 1) {
-            
-          }
-          else if(k == 2) {
-            
-          }
-          else if(k == 3) {
-            
-          }
-          else if(k == 4) {
-            
-          }
-          else if(k == 5) {
-            
-          }
-          else if(k == 6) {
-            
-          }
-          else if(k == 7) {
-            
-          }
-          else if(k == 8) {
-
-          }
-          else {
-            console.log("error: index out of bounds");
-          }
+          //determine magnitude and direction of gradient
+          var adj_mag = ( (this.state.normal_bins[i][j][k]*grid_size)/2 );
+          var dx = adj_mag*Math.cos(k*20);
+          var dy = adj_mag*Math.sin(k*20);
+          //paint the gradient in the 8x8 cell
+          ctx.moveTo( x+(grid_size/2), y+(grid_size/2) );
+          ctx.lineTo( x+(grid_size/2)+dx, y+(grid_size/2)+dy );
+          ctx.lineTo( x+(grid_size/2)+(-dx), y+(grid_size/2)+(-dy) );
         }
       }
     }
