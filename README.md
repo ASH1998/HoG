@@ -1,5 +1,5 @@
-# HoG-SVM-OR
-Object recognition with HoG and SVM
+# HoG
+Define a signature by Histogram of Gradients and visualize.
 
 **Demo**
-https://davidpynes.github.io/HoG-SVM-OR/
+https://davidpynes.github.io/HoG/

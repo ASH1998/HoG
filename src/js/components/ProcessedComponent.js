@@ -2,7 +2,6 @@ import React from 'react';
 import { Grid, Row, Col } from 'react-flexbox-grid';
 import styles from './style/style.css';
 import GraphedComponent from './GraphedComponent.js';
-import PlottedComponent from './PlottedComponent.js';
 
 export default class ProcessedComponent extends React.Component {
 
@@ -46,7 +45,7 @@ export default class ProcessedComponent extends React.Component {
      this.dragBoundingBox = this.dragBoundingBox.bind(this);
      this.dropBoundingBox = this.dropBoundingBox.bind(this);
 
-     this.initPlotPreview = this.initPlotPreview.bind(this);
+     this.visualizeGradients = this.visualizeGradients.bind(this);
 
   }
 
@@ -311,7 +310,7 @@ export default class ProcessedComponent extends React.Component {
     this.setState({signature_bins: all_signature_bins});
   }
 
-  initPlotPreview() { 
+  visualizeGradients() { 
     var ctx = this.refs.clip_canvas.getContext('2d');
     ctx.strokeStyle="#000000";    
     ctx.beginPath();
@@ -365,7 +364,7 @@ export default class ProcessedComponent extends React.Component {
         this.HoG();
         this.setState({train: false})
     }).then((result) => {
-        this.initPlotPreview();
+        this.visualizeGradients();
     })
   }
 
@@ -457,9 +456,9 @@ export default class ProcessedComponent extends React.Component {
               <canvas className={styles.imageContent} onMouseDown={this.dragBoundingBox} onTouchStart={this.dragBoundningBox} onMouseMove={this.moveBoundingBox} onTouchMove={this.moveBoundingBox} onMouseUp={this.dropBoundingBox} onTouchEnd={this.dropBoundingBox} ref="canvas" width={400} />
       	      <div  className={styles.format}>
                 <div className={styles.format}>
-        	        <button onClick={(e)=>this.train(e)} > Train </button>
+        	        <button onClick={(e)=>this.train(e)} style={{position:'absolute', top: '85px', left: '400px', border: '2px solid #fff'}} > Train </button>
         	      </div>
-                <div className={styles.format}>
+              {/*  <div className={styles.format}>
                   <select>
                     <option>yes</option>
                     <option>no</option>
@@ -468,12 +467,13 @@ export default class ProcessedComponent extends React.Component {
         	      <div className={styles.format}>
                   <button>Test</button>
                 </div>
+              */}
               </div>
             </Col>
             <Col xs={4} sm={3} md={2} lg={1} className={styles.previewImageContainer}>
         	    <canvas className={styles.previewImageContent} ref="clip_canvas" height={200} width={100} />
             </Col>
-          </Row>
+          </Row>  
           <Row>
             <span>
               {$graphPreview}
