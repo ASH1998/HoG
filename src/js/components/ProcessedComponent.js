@@ -338,22 +338,21 @@ export default class ProcessedComponent extends React.Component {
   commit() {
     let classifier = this.refs.classifier.value
     let featureVector = this.getSignature()
-    console.log(featureVector)
     if(classifier == "") {
       console.log("Error: must contain a classifier label.")
     }
     else {
       axios.post("http://72.219.134.107:2222/scripts/commit.php", {
-        classifier: classifier,
-        featureVector: featureVector
+        p_classifier: classifier,
+        p_featureVector: featureVector
       })
       .then( res => {
         console.log(res)
       } 
       )
       .catch(function (error) {
-        console.log(error);
-      });
+        console.log(error)
+      })
     }
   }
 
