@@ -29,7 +29,9 @@ export default class ProcessedComponent extends React.Component {
 
       signature_bins: {}, //store 16 1x36 vectors (normalized)
 
-      base: true
+      base: true,
+
+      signature: ""
 
      };
 
@@ -362,6 +364,7 @@ export default class ProcessedComponent extends React.Component {
         resolve();
       }).then((result) => {
         this.HoG();
+        this.printSignature();
         this.setState({train: false})
     }).then((result) => {
         this.visualizeGradients();
@@ -431,6 +434,17 @@ export default class ProcessedComponent extends React.Component {
     return false;
   }
 
+  printSignature() {
+    var sig = "<div>"
+    for(var i=0;i<this.state.signature_bins.length;i++) {
+      for(var j=0;j<this.state.signature_bins[i].length;j++) {
+          sig += this.state.signature_bins[i][j] + ", "       
+      }
+    }
+    sig+= "</div>"
+    this.setState({signature: sig})
+  }
+
   componentDidMount() {
 	  this.initComponentRoutine();
   }
@@ -480,6 +494,7 @@ export default class ProcessedComponent extends React.Component {
             </span>
           </Row>          
         </Grid>
+        <div style={{color: "#fff"}}> <span dangerouslySetInnerHTML={{__html: this.state.signature}} /> </div>
       </div>
     );
   }
