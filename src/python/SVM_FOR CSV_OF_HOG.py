@@ -1,6 +1,4 @@
-from pprint import pprint
 import numpy as np
-np.set_printoptions(threshold='nan')
 from sklearn import datasets, svm, metrics
 import csv
 
