@@ -30,6 +30,7 @@ export default class ProcessedComponent extends React.Component {
      this.initComponentRoutine = this.initComponentRoutine.bind(this)
      this.train = this.train.bind(this) //Calls the HoG function and stores data in ProcessedComponent's state
      this.commit = this.commit.bind(this) //Take the HoG feature + class name and stores in db
+     this.test = this.test.bind(this) //query the db and run svm. Display result.
      //mouse events to pick new location of sample space
      this.drawBoundingBox = this.drawBoundingBox.bind(this)
      this.moveBoundingBox = this.moveBoundingBox.bind(this)
@@ -347,13 +348,17 @@ export default class ProcessedComponent extends React.Component {
         p_featureVector: featureVector
       })
       .then( res => {
-        console.log(res.data)
+        console.log(res)
       } 
       )
       .catch(function (error) {
         console.log(error)
       })
     }
+  }
+
+  test() {
+    axios.get("http://72.219.134.107:2222/scripts/mysqltest.py").then( res => { console.log(res.data) } )    
   }
 
   componentRoutine() {
@@ -451,7 +456,8 @@ export default class ProcessedComponent extends React.Component {
       $commit = (
         <div style={{position:'absolute', top: '85px', left: '300px'}}>
          <input ref="classifier" type="text" placeholder="Classify image..." />
-         <button onClick={()=>{this.commit()}} style={{position: 'relative', margin: '0 10px 0 10px', border: '2px solid #fff'}}> commit </button>
+         <button onClick={()=>{this.commit()}} style={{position: 'relative', margin: '0 10px 0 10px', border: '2px solid #fff'}}> Commit </button>
+         <button onClick={()=>{this.test()}} style={{position: 'relative', border: '2px solid #fff'}}> Test </button> 
         </div>
       );
     }
