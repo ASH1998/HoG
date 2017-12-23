@@ -29,11 +29,6 @@ for i in temp_trained_data:
         temp = list(ast.literal_eval(i))
         trained_data.append(temp)
 
-#trained_class = []
-#for i in temp_trained_class:
-#       temp = list(ast.literal_eval(i))
-#       trained_class.append(temp)
-
 #call svm library
 classifier = svm.SVC(gamma=0.001)
 X =  trained_data

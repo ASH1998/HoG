@@ -30,7 +30,6 @@ export default class ProcessedComponent extends React.Component {
      this.initComponentRoutine = this.initComponentRoutine.bind(this)
      this.train = this.train.bind(this) //Calls the HoG function and stores data in ProcessedComponent's state
      this.commit = this.commit.bind(this) //Take the HoG feature + class name and stores in db
-     this.test = this.test.bind(this) //query the db and run svm. Display result.
      //mouse events to pick new location of sample space
      this.drawBoundingBox = this.drawBoundingBox.bind(this)
      this.moveBoundingBox = this.moveBoundingBox.bind(this)
@@ -326,13 +325,20 @@ export default class ProcessedComponent extends React.Component {
     destCtx.drawImage(this.refs.clip_canvas,0,0);    
     new Promise((resolve, reject) => {
         this.setState({train: true,clip_imageData: destCtx.getImageData(0,0,64,128)});
-        resolve();
+        resolve()
       }).then((result) => {
-        this.HoG();
-        this.getSignature();
+        this.HoG()
         this.setState({train: false})
     }).then((result) => {
         this.visualizeGradients();
+    }).then((result) => {
+      let featureVector = this.getSignature()
+      axios.post("http://72.219.134.107:2222/scripts/svmTest.py", {
+        p_featureVector: featureVector
+      })
+      .then( res => {
+        console.log(res)
+      })
     })
   }
 
@@ -355,10 +361,6 @@ export default class ProcessedComponent extends React.Component {
         console.log(error)
       })
     }
-  }
-
-  test() {
-    axios.get("http://72.219.134.107:2222/scripts/mysqltest.py").then( res => { console.log(res.data) } )    
   }
 
   componentRoutine() {
@@ -454,10 +456,9 @@ export default class ProcessedComponent extends React.Component {
         </Col>
       );
       $commit = (
-        <div style={{position:'absolute', top: '85px', left: '300px'}}>
+        <div style={{position:'absolute', top: '85px', left: '330px'}}>
          <input ref="classifier" type="text" placeholder="Classify image..." />
          <button onClick={()=>{this.commit()}} style={{position: 'relative', margin: '0 10px 0 10px', border: '2px solid #fff'}}> Commit </button>
-         <button onClick={()=>{this.test()}} style={{position: 'relative', border: '2px solid #fff'}}> Test </button> 
         </div>
       );
     }
@@ -470,7 +471,7 @@ export default class ProcessedComponent extends React.Component {
               <canvas className={styles.imageContent} onMouseDown={this.dragBoundingBox} onTouchStart={this.dragBoundningBox} onMouseMove={this.moveBoundingBox} onTouchMove={this.moveBoundingBox} onMouseUp={this.dropBoundingBox} onTouchEnd={this.dropBoundingBox} ref="canvas" width={400} />
       	      <div  className={styles.format}>
                 <div className={styles.format}>
-        	        <button onClick={(e)=>this.train(e)} style={{position:'absolute', top: '85px', left: '240px', border: '2px solid #fff'}} > Train </button>
+        	        <button onClick={(e)=>this.train(e)} style={{position:'absolute', top: '85px', left: '240px', border: '2px solid #fff'}} > Train/Test </button>
         	        {$commit}
                 </div>
               </div>
