@@ -333,7 +333,7 @@ export default class ProcessedComponent extends React.Component {
         this.visualizeGradients();
     }).then((result) => {
       let featureVector = this.getSignature()
-      axios.post("http://72.219.134.107:2222/scripts/svmTest.py", {
+      axios.post("http://72.219.134.107:2222/HoG/scripts/svmTest.py", {
         p_featureVector: featureVector
       })
       .then( res => {
@@ -349,7 +349,7 @@ export default class ProcessedComponent extends React.Component {
       console.log("Error: must contain a classifier label.")
     }
     else {
-      axios.post("http://72.219.134.107:2222/scripts/commit.php", {
+      axios.post("http://72.219.134.107:2222/HoG/scripts/commit.php", {
         p_classifier: classifier,
         p_featureVector: featureVector
       })
