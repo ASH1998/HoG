@@ -337,7 +337,7 @@ export default class ProcessedComponent extends React.Component {
         p_featureVector: featureVector
       })
       .then( res => {
-        console.log(res)
+        console.log(res.data)
       })
     })
   }
