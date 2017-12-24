@@ -333,7 +333,7 @@ export default class ProcessedComponent extends React.Component {
         this.visualizeGradients();
     }).then((result) => {
       let featureVector = this.getSignature()
-      axios.post("http://72.219.134.107:2222/HoG/scripts/svmTest.py", {
+      axios.post("http://72.219.134.107:2222/cgi-bin/svmTest.py", {
         p_featureVector: featureVector
       })
       .then( res => {

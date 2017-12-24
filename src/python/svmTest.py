@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 import ast
 import mysql.connector
@@ -37,4 +38,7 @@ classifier.fit(X,Y)
 
 #provide prediction
 test = [trained_data[0]]
+
+print("Content-type: text/html\n\n")
 print(classifier.predict(test))
+EOF
