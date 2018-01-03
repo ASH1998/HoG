@@ -473,6 +473,13 @@ export default class ProcessedComponent extends React.Component {
     }
 
     let $responseContent = []
+    if(this.state.train && this.state.svmResponse == "") {
+      $responseContent.push(
+        <div key={"responseBox"} style={{zIndex: '1000', border: "1px solid #000", position: 'absolute', top: '40px', left: '20px', minWidth: "360px", minHeight: "80px", background: "#eee"}}>
+         <span style={{position: 'relative', top: '10px', padding: '5px', margin: '10px'}}>Analyzing sample...</span>
+        </div>
+      )
+    }
     if(this.state.responseBox) {
       $responseContent.push(
         <div key={"responseBox"} style={{zIndex: '1000', border: "1px solid #000", position: 'absolute', top: '40px', left: '20px', minWidth: "360px", minHeight: "80px", background: "#eee"}}>
