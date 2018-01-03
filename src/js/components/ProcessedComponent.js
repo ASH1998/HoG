@@ -25,11 +25,15 @@ export default class ProcessedComponent extends React.Component {
       normal_bins: {}, //store 16x8 bins (normalized)
       signature_bins: {}, //store 16 1x36 vectors (normalized)
       base: true,
+      responseBox: false,
+      svmResponse: "",
+      needsClassifier: false,
      }
      this.componentRoutine = this.componentRoutine.bind(this)
      this.initComponentRoutine = this.initComponentRoutine.bind(this)
      this.train = this.train.bind(this) //Calls the HoG function and stores data in ProcessedComponent's state
      this.commit = this.commit.bind(this) //Take the HoG feature + class name and stores in db
+     this.needsClassifier = this.needsClassifier.bind(this) //If the svm predicts the wrong object, let the user input a new classification
      //mouse events to pick new location of sample space
      this.drawBoundingBox = this.drawBoundingBox.bind(this)
      this.moveBoundingBox = this.moveBoundingBox.bind(this)
@@ -56,8 +60,10 @@ export default class ProcessedComponent extends React.Component {
       event.nativeEvent.layerY > this.state.boxBoundaries.top &&
       event.nativeEvent.layerY < this.state.boxBoundaries.bottom
     ) {
+      //update the state, and also update the responsebox (in the case it is still showing)
       var moveableUpdate = {isMoveable: true, x: event.nativeEvent.layerX, y: event.nativeEvent.layerY}
-      this.setState({moveable: moveableUpdate, train: false })
+      this.setState({moveable: moveableUpdate, train: false, 
+        responseBox: false, needsClassifier: false, svmResponse: "" })
     }
   }
 
@@ -323,27 +329,28 @@ export default class ProcessedComponent extends React.Component {
     var destCtx = dest_canvas.getContext('2d');
     destCtx.scale(0.64, 0.64);
     destCtx.drawImage(this.refs.clip_canvas,0,0);    
-    new Promise((resolve, reject) => {
-        this.setState({train: true,clip_imageData: destCtx.getImageData(0,0,64,128)});
+    new Promise((resolve, reject) => {        
+        this.setState({train: true,clip_imageData: destCtx.getImageData(0,0,64,128)})
         resolve()
+      }).then((result) => {        
+        this.HoG()     
+        let featureVector = this.getSignature()
+        axios.post("http://72.219.134.107:2222/cgi-bin/svmTest.py", {
+          p_featureVector: featureVector
+        })
+        .then( res => {
+          var svmResponse = res.data.split("'")
+          this.setState({svmResponse: svmResponse[1],responseBox: true})
+        })
       }).then((result) => {
-        this.HoG()
-        this.setState({train: false})
-    }).then((result) => {
-        this.visualizeGradients();
-    }).then((result) => {
-      let featureVector = this.getSignature()
-      axios.post("http://72.219.134.107:2222/cgi-bin/svmTest.py", {
-        p_featureVector: featureVector
+        this.visualizeGradients()
       })
-      .then( res => {
-        console.log(res.data)
-      })
-    })
   }
 
   commit() {
-    let classifier = this.refs.classifier.value
+    let classifier = this.state.svmResponse
+    if(classifier == "")
+      classifier = this.refs.classifier.value
     let featureVector = this.getSignature()
     if(classifier == "") {
       console.log("Error: must contain a classifier label.")
@@ -354,13 +361,17 @@ export default class ProcessedComponent extends React.Component {
         p_featureVector: featureVector
       })
       .then( res => {
+        this.setState({responseBox: false, needsClassifier: false, svmResponse: ""})
         console.log(res)
-      } 
-      )
+      })
       .catch(function (error) {
         console.log(error)
       })
     }
+  }
+
+  needsClassifier() {
+    this.setState({svmResponse: "", needsClassifier: true})
   }
 
   componentRoutine() {
@@ -377,7 +388,7 @@ export default class ProcessedComponent extends React.Component {
       //draw image and draw a bounding, preview, box
       ctx.drawImage(img, 0, 0, w, h);	
       var imageData = ctx.getImageData(0, 0, w, h);
-      this.setState({ ogdata: imageData });
+      this.setState({ogdata: imageData});
       this.drawBoundingBox(0,0);
     }
     
@@ -457,10 +468,27 @@ export default class ProcessedComponent extends React.Component {
       );
       $commit = (
         <div style={{position:'absolute', top: '85px', left: '330px'}}>
-         <input ref="classifier" type="text" placeholder="Classify image..." />
-         <button onClick={()=>{this.commit()}} style={{position: 'relative', margin: '0 10px 0 10px', border: '2px solid #fff'}}> Commit </button>
         </div>
       );
+    }
+
+    let $responseContent = []
+    if(this.state.responseBox) {
+      $responseContent.push(
+        <div key={"responseBox"} style={{zIndex: '1000', border: "1px solid #000", position: 'absolute', top: '40px', left: '20px', minWidth: "360px", minHeight: "80px", background: "#eee"}}>
+         <span style={{position: 'relative', top: '10px', padding: '5px', margin: '10px'}}>Is this a <b>{this.state.svmResponse}</b>?</span>
+         <span style={{position: 'relative', top: '10px', padding: '5px', margin: '10px'}}><button onClick={()=>{this.commit()}}>Yes </button></span>
+         <span style={{position: 'relative', top: '10px', padding: '5px', margin: '10px'}}><button onClick={()=>{this.needsClassifier()}}>No </button></span>
+        </div>
+      )
+    }
+    if(this.state.responseBox && this.state.needsClassifier) {
+      $responseContent.push(
+        <div key={"classifierBox"} style={{zIndex: '1000', border: "1px solid #000", position: 'absolute', top: '40px', left: '20px', minWidth: "360px", minHeight: "80px", background: "#eee"}}>
+          <span style={{position: 'relative', top: '10px', padding: '5px', margin: '10px'}}><input ref="classifier" type="text" placeholder="Classify image..." /></span>
+          <span style={{position: 'relative', top: '10px', padding: '5px', margin: '10px'}}><button onClick={()=>{this.commit()}} > Commit </button></span>
+        </div>
+      )      
     }
 
     return (
@@ -486,7 +514,7 @@ export default class ProcessedComponent extends React.Component {
             </span>
           </Row>          
         </Grid>
-        {/*<div style={{color: "#fff"}}> <span dangerouslySetInnerHTML={{__html: this.state.signature}} /> </div>*/}
+        {$responseContent}
       </div>
     );
   }
