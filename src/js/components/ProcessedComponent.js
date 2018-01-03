@@ -28,6 +28,7 @@ export default class ProcessedComponent extends React.Component {
       responseBox: false,
       svmResponse: "",
       needsClassifier: false,
+      loading: false,
      }
      this.componentRoutine = this.componentRoutine.bind(this)
      this.initComponentRoutine = this.initComponentRoutine.bind(this)
@@ -330,7 +331,7 @@ export default class ProcessedComponent extends React.Component {
     destCtx.scale(0.64, 0.64);
     destCtx.drawImage(this.refs.clip_canvas,0,0);    
     new Promise((resolve, reject) => {        
-        this.setState({train: true,clip_imageData: destCtx.getImageData(0,0,64,128)})
+        this.setState({train: true,clip_imageData: destCtx.getImageData(0,0,64,128),loading: true})
         resolve()
       }).then((result) => {        
         this.HoG()     
@@ -361,7 +362,7 @@ export default class ProcessedComponent extends React.Component {
         p_featureVector: featureVector
       })
       .then( res => {
-        this.setState({responseBox: false, needsClassifier: false, svmResponse: ""})
+        this.setState({responseBox: false, needsClassifier: false, svmResponse: "",loading: false})
         console.log(res)
       })
       .catch(function (error) {
@@ -456,7 +457,6 @@ export default class ProcessedComponent extends React.Component {
   render() {    
     let graphTrainedComponent = this.state.train;
     let $graphPreview = null;
-    let $commit = null;
       
     if (graphTrainedComponent) {
       $graphPreview = (
@@ -466,16 +466,12 @@ export default class ProcessedComponent extends React.Component {
           </div>
         </Col>
       );
-      $commit = (
-        <div style={{position:'absolute', top: '85px', left: '330px'}}>
-        </div>
-      );
     }
 
     let $responseContent = []
-    if(this.state.train && this.state.svmResponse == "") {
+    if(this.state.loading && !this.state.responseBox) {
       $responseContent.push(
-        <div key={"responseBox"} style={{zIndex: '1000', border: "1px solid #000", position: 'absolute', top: '40px', left: '20px', minWidth: "360px", minHeight: "80px", background: "#eee"}}>
+        <div key={"loadingBox"} style={{zIndex: '1000', border: "1px solid #000", position: 'absolute', top: '40px', left: '20px', minWidth: "360px", minHeight: "80px", background: "#eee"}}>
          <span style={{position: 'relative', top: '10px', padding: '5px', margin: '10px'}}>Analyzing sample...</span>
         </div>
       )
@@ -507,8 +503,7 @@ export default class ProcessedComponent extends React.Component {
       	      <div  className={styles.format}>
                 <div className={styles.format}>
         	        <button onClick={(e)=>this.train(e)} style={{position:'absolute', top: '85px', left: '240px', border: '2px solid #fff'}} > Train/Test </button>
-        	        {$commit}
-                </div>
+        	      </div>
               </div>
             </Col>
             <Col xs={4} sm={3} md={2} lg={1} className={styles.previewImageContainer}>
